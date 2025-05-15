@@ -2,18 +2,23 @@ package main
 
 import (
 	"log"
+	"net/http"
 
-	"github.com/marceloneiva/myapi/internal/api"
-	"github.com/marceloneiva/myapi/pkg/config"
+	"github.com/marceloneiva/myapi/internal/aplication/usecase"
+	"github.com/marceloneiva/myapi/internal/config"
+	"github.com/marceloneiva/myapi/internal/infrastructure/api"
+	"github.com/marceloneiva/myapi/internal/infrastructure/repository"
 )
 
 func main() {
 	config.Connect() // inicia a conexão com o banco
 
-	router := api.SetupRoutes()
+	repo := repository.NewMySQLRateRepo()
+	uc := usecase.NewConvertCurrencyUseCase(repo)
+	handler := api.NewHandler(uc)
 
-	log.Println("Servidor iniciado na porta :8080")
-	if err := router.Run(":8080"); err != nil {
-		log.Fatalf("Erro ao iniciar o servidor: %v", err)
-	}
+	http.HandleFunc("/convert", handler.ConvertCurrency)
+
+	log.Println("Servidor iniciado em :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
