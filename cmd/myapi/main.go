@@ -14,6 +14,7 @@ func main() {
 	config.Connect() // inicia a conexão com o banco
 
 	repo := repository.NewMySQLRateRepo()
+
 	uc := usecase.NewConvertCurrencyUseCase(repo)
 	handler := api.NewHandler(uc)
 
